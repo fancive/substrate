@@ -32,9 +32,10 @@ import (
 
 func TestClassifyOutcome(t *testing.T) {
 	tests := []struct {
-		name     string
-		err      error
-		expected string
+		name      string
+		err       error
+		direction Direction
+		expected  string
 	}{
 		{
 			name:     "nil error maps to ok",
@@ -82,9 +83,45 @@ func TestClassifyOutcome(t *testing.T) {
 			expected: "not_found",
 		},
 		{
-			name:     "StatusCode_ServiceUnavailable ReqError maps to no_capacity",
-			err:      NewReqError(envoy_type.StatusCode_ServiceUnavailable, "no free workers"),
+			name:     "router parking limit is not scheduler capacity",
+			err:      NewReqError(envoy_type.StatusCode_ServiceUnavailable, "actor unavailable: router at capacity"),
+			expected: "unavailable",
+		},
+		{
+			name:     "missing egress configuration is not scheduler capacity",
+			err:      NewReqError(envoy_type.StatusCode_ServiceUnavailable, "egress unavailable: no actor-identity CA configured"),
+			expected: "unavailable",
+		},
+		{
+			name:     "policy lookup denial is not scheduler capacity",
+			err:      WrapReqError(envoy_type.StatusCode_ServiceUnavailable, status.Error(codes.PermissionDenied, "denied"), "egress unavailable: policy lookup failed"),
+			expected: "unavailable",
+		},
+		{
+			name:     "policy lookup failure is not scheduler capacity",
+			err:      WrapReqError(envoy_type.StatusCode_ServiceUnavailable, errors.New("store failed"), "egress unavailable: policy lookup failed"),
+			expected: "unavailable",
+		},
+		{
+			name:     "wrapped scheduler capacity retains its outcome",
+			err:      WrapReqError(envoy_type.StatusCode_ServiceUnavailable, status.Error(codes.ResourceExhausted, "no worker with room"), "actor unavailable"),
 			expected: "no_capacity",
+		},
+		{
+			name:     "wrapped precondition retains its outcome",
+			err:      WrapReqError(envoy_type.StatusCode_ServiceUnavailable, status.Error(codes.FailedPrecondition, "not resumable"), "actor unavailable"),
+			expected: "failed_precondition",
+		},
+		{
+			name:     "wrapped timeout retains its outcome",
+			err:      WrapReqError(envoy_type.StatusCode_ServiceUnavailable, context.DeadlineExceeded, "egress unavailable"),
+			expected: "timeout",
+		},
+		{
+			name:      "egress resource exhaustion is not scheduler capacity",
+			err:       WrapReqError(envoy_type.StatusCode_ServiceUnavailable, status.Error(codes.ResourceExhausted, "provider overloaded"), "egress unavailable"),
+			direction: DirectionEgress,
+			expected:  "unavailable",
 		},
 		{
 			name:     "StatusCode_TooManyRequests ReqError maps to rate_limited",
@@ -100,7 +137,11 @@ func TestClassifyOutcome(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := classifyOutcome(tc.err); got != tc.expected {
+			direction := tc.direction
+			if direction == "" {
+				direction = DirectionIngress
+			}
+			if got := classifyOutcome(tc.err, direction); got != tc.expected {
 				t.Errorf("classifyOutcome(%v) = %q, want %q", tc.err, got, tc.expected)
 			}
 		})
@@ -116,7 +157,7 @@ func TestRecordRouteDuration_Attributes(t *testing.T) {
 	}
 
 	s := NewServer(50051, h, nil)
-	s.recordRouteDuration(context.Background(), 10*time.Millisecond, "team-a-ns", "tmpl-a", classifyOutcome(nil), ateattr.RouterResumeTriggered)
+	s.recordRouteDuration(context.Background(), 10*time.Millisecond, "team-a-ns", "tmpl-a", classifyOutcome(nil, DirectionIngress), ateattr.RouterResumeTriggered)
 
 	var rm metricdata.ResourceMetrics
 	if err := reader.Collect(context.Background(), &rm); err != nil {
@@ -141,6 +182,44 @@ func TestRecordRouteDuration_Attributes(t *testing.T) {
 	}
 }
 
+func TestProcessRequestHeadersRecordsCapacityByDirection(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		direction Direction
+		chain     string
+		want      string
+	}{
+		{"scheduler capacity", DirectionIngress, ingressHTTPListener, "no_capacity"},
+		{"egress provider capacity", DirectionEgress, EgressFilterChainName, "unavailable"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			reader := sdkmetric.NewManualReader()
+			mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
+			h, err := mp.Meter(ServiceName).Float64Histogram(routeDurationMetricName)
+			if err != nil {
+				t.Fatal(err)
+			}
+			handler := &stubHandler{direction: tc.direction, err: WrapReqError(
+				envoy_type.StatusCode_ServiceUnavailable,
+				status.Error(codes.ResourceExhausted, "capacity exhausted"), "unavailable")}
+			s := NewServer(50051, h, Handlers{tc.direction: handler})
+			req := connectRequest("envoy.filters.http.ext_proc", tc.chain)
+			resp := s.processRequestHeaders(context.Background(), req, req.GetRequestHeaders())
+			if got := resp.GetImmediateResponse().GetStatus().GetCode(); got != envoy_type.StatusCode_ServiceUnavailable {
+				t.Fatalf("response code = %v, want 503", got)
+			}
+			var rm metricdata.ResourceMetrics
+			if err := reader.Collect(context.Background(), &rm); err != nil {
+				t.Fatal(err)
+			}
+			dp := rm.ScopeMetrics[0].Metrics[0].Data.(metricdata.Histogram[float64]).DataPoints[0]
+			if got, ok := dp.Attributes.Value(ateattr.RouterOutcomeKey); !ok || got.AsString() != tc.want {
+				t.Errorf("route outcome = %q, want %q", got.AsString(), tc.want)
+			}
+		})
+	}
+}
+
 func TestRecordRouteDuration_NormalizesEmptyTemplateDimensions(t *testing.T) {
 	reader := sdkmetric.NewManualReader()
 	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
@@ -150,7 +229,7 @@ func TestRecordRouteDuration_NormalizesEmptyTemplateDimensions(t *testing.T) {
 	}
 
 	s := NewServer(50051, h, nil)
-	s.recordRouteDuration(context.Background(), 5*time.Millisecond, "", "", classifyOutcome(errors.New("fail")), ateattr.RouterResumeUnknown)
+	s.recordRouteDuration(context.Background(), 5*time.Millisecond, "", "", classifyOutcome(errors.New("fail"), DirectionIngress), ateattr.RouterResumeUnknown)
 
 	var rm metricdata.ResourceMetrics
 	if err := reader.Collect(context.Background(), &rm); err != nil {

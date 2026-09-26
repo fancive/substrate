@@ -23,17 +23,18 @@ import (
 	envoy_type "github.com/envoyproxy/go-control-plane/envoy/type/v3"
 )
 
-// stubHandler records that it ran and returns an empty successful Result.
+// stubHandler records that it ran and returns an empty Result with its error.
 type stubHandler struct {
 	direction Direction
 	called    bool
+	err       error
 }
 
 func (h *stubHandler) Direction() Direction { return h.direction }
 
 func (h *stubHandler) HandleRequestHeaders(context.Context, *RequestMetadata) (Result, error) {
 	h.called = true
-	return Result{Response: &extprocv3.HeadersResponse{Response: &extprocv3.CommonResponse{}}}, nil
+	return Result{Response: &extprocv3.HeadersResponse{Response: &extprocv3.CommonResponse{}}}, h.err
 }
 
 // The mux must pick the handler by the Envoy-asserted filter chain, and refuse

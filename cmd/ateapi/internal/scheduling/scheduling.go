@@ -47,14 +47,14 @@ type Constraints struct {
 	Limits *ateapipb.Resources
 }
 
-// ErrNoCapacity is returned by Schedule when no free worker satisfies the
-// constraints.
-var ErrNoCapacity = errors.New("no free workers satisfy the constraints")
+// ErrNoCapacity is returned by Schedule when no worker satisfying the
+// constraints has room for the actor.
+var ErrNoCapacity = errors.New("no workers satisfying the constraints have room for the actor")
 
 // Scheduler answers placement questions against the current worker fleet.
 type Scheduler interface {
-	// Schedule returns a free worker satisfying constraints.
-	// Returns ErrNoCapacity when no free worker satisfies the requested constraints.
+	// Schedule returns a worker satisfying constraints with room for the actor.
+	// Returns ErrNoCapacity when no such worker has room.
 	Schedule(ctx context.Context, constraints Constraints) (*ateapipb.Worker, error)
 
 	// Applies reports whether worker satisfies non-capacity constraints. Capacity

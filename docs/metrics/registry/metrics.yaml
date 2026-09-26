@@ -459,8 +459,9 @@ groups:
               stability: development
               value: no_capacity
               brief: >
-                The fleet had no free worker. This is a capacity problem and not
-                a defect. It shows the capacity pressure at the request edge.
+                No worker satisfying the actor's constraints had room. The
+                ingress scheduler returned ResourceExhausted. Other HTTP 503 responses,
+                including a full router parking lot, do not use this outcome.
             - id: failed_precondition
               stability: development
               value: failed_precondition

@@ -260,6 +260,7 @@ For `ate.workerpool.desired_workers` and `ate.workerpool.ready_workers`:
 
 For `atenet.router.route.duration`:
 * `ate.router.outcome` categorizes the route attempt result: `ok`, `cancelled`, `timeout`, `no_capacity`, `failed_precondition`, `lock_conflict`, `not_found`, `unavailable`, `rate_limited`, or `resume_error`.
+* `no_capacity` requires the ingress scheduler's `ResourceExhausted` result: no eligible worker had room for the actor. A 503 without that cause, such as a full router parking lot or an egress policy lookup failure, is `unavailable`. Egress resource exhaustion is also `unavailable`, since that direction does not schedule actors. Other wrapped gRPC failures retain their more specific outcome.
 * `ate.router.resume` indicates the singleflight execution state of actor resumption: `none` (the resume found the actor already running), `triggered` (this request completed a cold activation), `joined` (this request waited on another request's resume, which activated the actor), or `unknown` (the resume did not complete, so whether an activation ran is unknown). `ate.template.atespace` and `ate.template.name` hold `unknown` when the router has no template to name.
 
 For `ate.imagecache.requests`:

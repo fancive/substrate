@@ -227,6 +227,21 @@ const (
 	RouterResumeUnknown = "unknown"
 )
 
+// Values for RouterOutcomeKey. NoCapacity identifies the scheduler's
+// ResourceExhausted result, not every HTTP 503 returned by a gateway.
+const (
+	RouterOutcomeOK                 = "ok"
+	RouterOutcomeCancelled          = "cancelled"
+	RouterOutcomeTimeout            = "timeout"
+	RouterOutcomeNoCapacity         = "no_capacity"
+	RouterOutcomeFailedPrecondition = "failed_precondition"
+	RouterOutcomeLockConflict       = "lock_conflict"
+	RouterOutcomeNotFound           = "not_found"
+	RouterOutcomeUnavailable        = "unavailable"
+	RouterOutcomeRateLimited        = "rate_limited"
+	RouterOutcomeResumeError        = "resume_error"
+)
+
 // Values for ImageCacheOutcomeKey. A hit is a complete image record; a miss
 // must pull. A failed lookup is neither: Error is the only one that carries an
 // error.type, Cancelled and Timeout mean the caller gave up.

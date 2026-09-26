@@ -391,6 +391,17 @@ func TestMetricLabelValues(t *testing.T) {
 		{SchedulerOutcomeNoFreeWorker, "no_free_worker"},
 		{SchedulerOutcomeError, "error"},
 
+		{RouterOutcomeOK, "ok"},
+		{RouterOutcomeCancelled, "cancelled"},
+		{RouterOutcomeTimeout, "timeout"},
+		{RouterOutcomeNoCapacity, "no_capacity"},
+		{RouterOutcomeFailedPrecondition, "failed_precondition"},
+		{RouterOutcomeLockConflict, "lock_conflict"},
+		{RouterOutcomeNotFound, "not_found"},
+		{RouterOutcomeUnavailable, "unavailable"},
+		{RouterOutcomeRateLimited, "rate_limited"},
+		{RouterOutcomeResumeError, "resume_error"},
+
 		{SnapshotKindGolden, "golden"},
 		{SnapshotKindLatest, "latest"},
 		{SnapshotKindLocal, "local"},
