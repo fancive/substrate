@@ -25,6 +25,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/agent-substrate/substrate/cmd/ateapi/internal/apivalidation"
 	"github.com/agent-substrate/substrate/cmd/ateapi/internal/defaults"
 	"github.com/agent-substrate/substrate/cmd/ateapi/internal/store"
 	"github.com/agent-substrate/substrate/internal/actoridjwt"
@@ -201,7 +202,7 @@ func (s *ServiceImpl) resolveTagSource(ctx context.Context, actorAtespace string
 func validateCreateActorRequest(ctx context.Context, req *ateapipb.CreateActorRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_CreateActorRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_CreateActorRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) GetActor(ctx context.Context, req *ateapipb.GetActorRequest) (*ateapipb.Actor, error) {
@@ -225,7 +226,7 @@ func (s *ServiceImpl) GetActor(ctx context.Context, actorRef resources.ActorRef)
 func validateGetActorRequest(ctx context.Context, req *ateapipb.GetActorRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_GetActorRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_GetActorRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) ListActors(ctx context.Context, req *ateapipb.ListActorsRequest) (*ateapipb.ListActorsResponse, error) {
@@ -250,7 +251,7 @@ func (s *ServiceImpl) ListActors(ctx context.Context, atespace string, opts stor
 func validateListActorsRequest(ctx context.Context, req *ateapipb.ListActorsRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_ListActorsRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_ListActorsRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) UpdateActor(ctx context.Context, req *ateapipb.UpdateActorRequest) (*ateapipb.Actor, error) {
@@ -411,7 +412,7 @@ func validateUpdateActorRequest(ctx context.Context, req *ateapipb.UpdateActorRe
 	// validating the request itself. The result will be validated later, after
 	// we have a current value to compare against.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_UpdateActorRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_UpdateActorRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) DeleteActor(ctx context.Context, req *ateapipb.DeleteActorRequest) (deleted *ateapipb.Actor, err error) {
@@ -450,7 +451,7 @@ func (s *ServiceImpl) DeleteActor(ctx context.Context, actorRef resources.ActorR
 func validateDeleteActorRequest(ctx context.Context, req *ateapipb.DeleteActorRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_DeleteActorRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_DeleteActorRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) PauseActor(ctx context.Context, req *ateapipb.PauseActorRequest) (*ateapipb.PauseActorResponse, error) {
@@ -478,7 +479,7 @@ func (s *RPCService) PauseActor(ctx context.Context, req *ateapipb.PauseActorReq
 func validatePauseActorRequest(ctx context.Context, req *ateapipb.PauseActorRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_PauseActorRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_PauseActorRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) ResumeActor(ctx context.Context, req *ateapipb.ResumeActorRequest) (*ateapipb.ResumeActorResponse, error) {
@@ -506,7 +507,7 @@ func (s *RPCService) ResumeActor(ctx context.Context, req *ateapipb.ResumeActorR
 func validateResumeActorRequest(ctx context.Context, req *ateapipb.ResumeActorRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_ResumeActorRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_ResumeActorRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) SuspendActor(ctx context.Context, req *ateapipb.SuspendActorRequest) (*ateapipb.SuspendActorResponse, error) {
@@ -533,7 +534,7 @@ func (s *RPCService) SuspendActor(ctx context.Context, req *ateapipb.SuspendActo
 func validateSuspendActorRequest(ctx context.Context, req *ateapipb.SuspendActorRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_SuspendActorRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_SuspendActorRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) RevertActor(ctx context.Context, req *ateapipb.RevertActorRequest) (*ateapipb.RevertActorResponse, error) {
@@ -560,35 +561,19 @@ func (s *RPCService) RevertActor(ctx context.Context, req *ateapipb.RevertActorR
 func validateRevertActorRequest(ctx context.Context, req *ateapipb.RevertActorRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_RevertActorRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_RevertActorRequest(ctx, op, nil, req, nil)
 }
 
 func validateActorUpdate(ctx context.Context, fldPath *field.Path, newVal, oldVal *ateapipb.Actor, requireStatus bool) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Update}
-	errs := Validate_Actor(ctx, op, fldPath, newVal, oldVal)
+	errs := apivalidation.Validate_Actor(ctx, op, fldPath, newVal, oldVal)
 	if requireStatus {
 		// Status is optional in the schema, but is actually required to be set
 		// by the server.  If it was specified, it was already validated above,
 		// but if it was not specified we need to flag that as an error.
 		errs = append(errs, validate.RequiredPointer(ctx, op, fldPath.Child("status"), newVal.GetStatus(), nil)...)
 	}
-	return errs
-}
-
-// This exists only because nested subfield tags are not supported yet.
-func ValidateCustom_UpdateActorRequest_Actor(ctx context.Context, op operation.Operation, fldPath *field.Path, actor, _ *ateapipb.Actor) field.ErrorList {
-	if actor == nil || actor.Metadata == nil {
-		return nil // handled by DV
-	}
-
-	// Updates are validated in 2 steps: first the update request and then the
-	// resource itself. DV for the request doesn't descend into the resource
-	// metadata.  Once DV supports nested subfield tags, this can be changed to
-	// something like:
-	//   +k8s:subfield(metadata)=+k8s:subfield(atespace)=+k8s:required
-	errs := Validate_ResourceMetadata(ctx, op, fldPath.Child("metadata"), actor.Metadata, nil)
-	errs = append(errs, validate.RequiredValue(ctx, op, fldPath.Child("metadata", "atespace"), &actor.Metadata.Atespace, nil)...)
 	return errs
 }
 
@@ -649,7 +634,7 @@ func (s *RPCService) MintActorJWT(ctx context.Context, req *ateapipb.MintActorJW
 func validateMintActorJWTRequest(ctx context.Context, req *ateapipb.MintActorJWTRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_MintActorJWTRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_MintActorJWTRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) MintActorCertificate(ctx context.Context, req *ateapipb.MintActorCertificateRequest) (*ateapipb.MintActorCertificateResponse, error) {
@@ -741,5 +726,5 @@ func (s *RPCService) MintActorCertificate(ctx context.Context, req *ateapipb.Min
 func validateMintActorCertificateRequest(ctx context.Context, req *ateapipb.MintActorCertificateRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_MintActorCertificateRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_MintActorCertificateRequest(ctx, op, nil, req, nil)
 }

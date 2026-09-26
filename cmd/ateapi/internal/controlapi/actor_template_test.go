@@ -21,6 +21,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/agent-substrate/substrate/cmd/ateapi/internal/apivalidation"
 	"github.com/agent-substrate/substrate/cmd/ateapi/internal/store"
 	"github.com/agent-substrate/substrate/cmd/ateapi/internal/store/storetest"
 	"github.com/agent-substrate/substrate/internal/resources"
@@ -1321,7 +1322,7 @@ func TestValidateActorTemplate(t *testing.T) {
 				tt.mutate(tmpl)
 			}
 			op := operation.Operation{Type: operation.Create}
-			assertValidateErr(t, Validate_ActorTemplate(context.Background(), op, nil, tmpl, nil), tt.want)
+			assertValidateErr(t, apivalidation.Validate_ActorTemplate(context.Background(), op, nil, tmpl, nil), tt.want)
 		})
 	}
 }

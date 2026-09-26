@@ -23,8 +23,8 @@ import (
 	"path"
 	"time"
 
+	"github.com/agent-substrate/substrate/cmd/ateapi/internal/apivalidation"
 	"github.com/agent-substrate/substrate/cmd/ateapi/internal/ateletauth"
-	"github.com/agent-substrate/substrate/cmd/ateapi/internal/controlapi"
 	"github.com/agent-substrate/substrate/cmd/ateapi/internal/store"
 	"github.com/agent-substrate/substrate/internal/resources"
 	"github.com/agent-substrate/substrate/pkg/proto/ateapipb"
@@ -102,5 +102,5 @@ func (s *Server) MintAteomActorCertificate(ctx context.Context, req *ateapipb.Mi
 
 func validateMintAteomActorCertificateRequest(ctx context.Context, req *ateapipb.MintAteomActorCertificateRequest) field.ErrorList {
 	op := operation.Operation{Type: operation.Create}
-	return controlapi.Validate_MintAteomActorCertificateRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_MintAteomActorCertificateRequest(ctx, op, nil, req, nil)
 }

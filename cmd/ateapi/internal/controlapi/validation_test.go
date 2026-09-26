@@ -21,6 +21,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/agent-substrate/substrate/cmd/ateapi/internal/apivalidation"
 	"github.com/agent-substrate/substrate/pkg/proto/ateapipb"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -118,7 +119,7 @@ func TestValidateResourceMetadataCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Create}
 			matcher := field.ErrorMatcher{}.ByType().ByField().ByOrigin()
-			matcher.Test(t, tt.want, Validate_ResourceMetadata(context.Background(), op, nil, tt.obj, nil))
+			matcher.Test(t, tt.want, apivalidation.Validate_ResourceMetadata(context.Background(), op, nil, tt.obj, nil))
 		})
 	}
 }
@@ -234,7 +235,7 @@ func TestValidateResourceMetadataUpdate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Update}
 			matcher := field.ErrorMatcher{}.ByType().ByField().ByOrigin()
-			matcher.Test(t, tt.want, Validate_ResourceMetadata(context.Background(), op, nil, tt.newObj, tt.oldObj))
+			matcher.Test(t, tt.want, apivalidation.Validate_ResourceMetadata(context.Background(), op, nil, tt.newObj, tt.oldObj))
 		})
 	}
 }
@@ -433,7 +434,7 @@ func TestValidateResourceMetadataNameAndAtespaceFormat(t *testing.T) {
 			obj := proto.CloneOf(tt.obj) // avoid internal mutations
 			op := operation.Operation{Type: operation.Create}
 			matcher := field.ErrorMatcher{}.ByType().ByField().ByOrigin()
-			matcher.Test(t, tt.want, Validate_ResourceMetadata(context.Background(), op, nil, obj, nil))
+			matcher.Test(t, tt.want, apivalidation.Validate_ResourceMetadata(context.Background(), op, nil, obj, nil))
 		})
 	}
 }
@@ -647,7 +648,7 @@ func TestValidateObjectRef(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Create}
 			matcher := field.ErrorMatcher{}.ByType().ByField().ByOrigin()
-			matcher.Test(t, tt.want, Validate_ObjectRef(context.Background(), op, nil, tt.ref, nil))
+			matcher.Test(t, tt.want, apivalidation.Validate_ObjectRef(context.Background(), op, nil, tt.ref, nil))
 		})
 	}
 }
@@ -835,7 +836,7 @@ func TestValidateSystemInfoVolumeSource(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Create}
 			matcher := field.ErrorMatcher{}.ByType().ByField().ByOrigin()
-			matcher.Test(t, tt.want, Validate_SystemInfoVolumeSource(context.Background(), op, nil, tt.obj, nil))
+			matcher.Test(t, tt.want, apivalidation.Validate_SystemInfoVolumeSource(context.Background(), op, nil, tt.obj, nil))
 		})
 	}
 }
@@ -891,7 +892,7 @@ func TestValidateTrustBundleDataSource(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Create}
 			matcher := field.ErrorMatcher{}.ByType().ByField().ByOrigin()
-			matcher.Test(t, tt.want, Validate_TrustBundleDataSource(context.Background(), op, nil, tt.obj, nil))
+			matcher.Test(t, tt.want, apivalidation.Validate_TrustBundleDataSource(context.Background(), op, nil, tt.obj, nil))
 		})
 	}
 }
@@ -1025,7 +1026,7 @@ func TestValidateExternalVolume(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Create}
-			assertValidateErr(t, Validate_ExternalVolume(context.Background(), op, nil, tt.obj, nil), tt.want)
+			assertValidateErr(t, apivalidation.Validate_ExternalVolume(context.Background(), op, nil, tt.obj, nil), tt.want)
 		})
 	}
 }
@@ -1080,7 +1081,7 @@ func TestValidateExternalVolume_Update(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Update}
-			assertValidateErr(t, Validate_ExternalVolume(context.Background(), op, nil, tt.newObj, tt.oldObj), tt.want)
+			assertValidateErr(t, apivalidation.Validate_ExternalVolume(context.Background(), op, nil, tt.newObj, tt.oldObj), tt.want)
 		})
 	}
 }
@@ -1122,7 +1123,7 @@ func TestValidateDeleteOptions(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Create}
 			matcher := field.ErrorMatcher{}.ByType().ByField().ByOrigin()
-			matcher.Test(t, tt.want, Validate_DeleteOptions(context.Background(), op, nil, tt.obj, nil))
+			matcher.Test(t, tt.want, apivalidation.Validate_DeleteOptions(context.Background(), op, nil, tt.obj, nil))
 		})
 	}
 }
@@ -1210,7 +1211,7 @@ func TestValidateExternalSnapshot(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Create}
-			assertValidateErr(t, Validate_ExternalSnapshot(context.Background(), op, nil, tt.obj, nil), tt.want)
+			assertValidateErr(t, apivalidation.Validate_ExternalSnapshot(context.Background(), op, nil, tt.obj, nil), tt.want)
 		})
 	}
 }
@@ -1289,7 +1290,7 @@ func TestValidateExternalSnapshotUpdate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Update}
-			assertValidateErr(t, Validate_ExternalSnapshot(context.Background(), op, nil, tt.newObj, tt.oldObj), tt.want)
+			assertValidateErr(t, apivalidation.Validate_ExternalSnapshot(context.Background(), op, nil, tt.newObj, tt.oldObj), tt.want)
 		})
 	}
 }
@@ -1315,7 +1316,7 @@ func TestValidateNestedExternalSnapshot(t *testing.T) {
 				newVal := validActor(withActorStatus(func(s *ateapipb.ActorStatus) {
 					s.ExternalSnapshot = badExternalSnapshot()
 				}))
-				return Validate_Actor(ctx, op, nil, newVal, oldVal)
+				return apivalidation.Validate_Actor(ctx, op, nil, newVal, oldVal)
 			},
 		},
 		{
@@ -1326,7 +1327,7 @@ func TestValidateNestedExternalSnapshot(t *testing.T) {
 				obj := validTag(func(tag *ateapipb.Tag) {
 					tag.Status.Snapshot = badExternalSnapshot()
 				})
-				return Validate_Tag(ctx, op, nil, obj, nil)
+				return apivalidation.Validate_Tag(ctx, op, nil, obj, nil)
 			},
 		},
 	}
@@ -1454,7 +1455,7 @@ func TestValidateTag(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Create}
-			assertValidateErr(t, Validate_Tag(context.Background(), op, nil, tt.obj, nil), tt.want)
+			assertValidateErr(t, apivalidation.Validate_Tag(context.Background(), op, nil, tt.obj, nil), tt.want)
 		})
 	}
 }
@@ -1498,7 +1499,7 @@ func TestValidateTagUpdate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Update}
-			assertValidateErr(t, Validate_Tag(context.Background(), op, nil, tt.newObj, tt.oldObj), tt.want)
+			assertValidateErr(t, apivalidation.Validate_Tag(context.Background(), op, nil, tt.newObj, tt.oldObj), tt.want)
 		})
 	}
 }
@@ -1521,14 +1522,14 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 			name: "create: valid",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.CreateTagRequest{Tag: validTag()}
-				return Validate_CreateTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_CreateTagRequest(ctx, op, nil, req, nil)
 			},
 		},
 		{
 			name: "create: missing tag",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.CreateTagRequest{}
-				return Validate_CreateTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_CreateTagRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{field.Required(tagPath, "")},
 		},
@@ -1538,7 +1539,7 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 				tag := validTag()
 				tag.Status.Snapshot = badExternalSnapshot()
 				req := &ateapipb.CreateTagRequest{Tag: tag}
-				return Validate_CreateTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_CreateTagRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{
 				field.Required(tagPath.Child("status", "snapshot", "snapshot_uri"), ""),
@@ -1549,14 +1550,14 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 			name: "update: valid",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.UpdateTagRequest{Tag: validTag()}
-				return Validate_UpdateTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_UpdateTagRequest(ctx, op, nil, req, nil)
 			},
 		},
 		{
 			name: "update: missing tag",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.UpdateTagRequest{}
-				return Validate_UpdateTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_UpdateTagRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{field.Required(tagPath, "")},
 		},
@@ -1568,21 +1569,21 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 				tag := validTag()
 				tag.Status.Snapshot = badExternalSnapshot()
 				req := &ateapipb.UpdateTagRequest{Tag: tag}
-				return Validate_UpdateTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_UpdateTagRequest(ctx, op, nil, req, nil)
 			},
 		},
 		{
 			name: "get: valid",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.GetTagRequest{Tag: validRef()}
-				return Validate_GetTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_GetTagRequest(ctx, op, nil, req, nil)
 			},
 		},
 		{
 			name: "get: missing tag",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.GetTagRequest{}
-				return Validate_GetTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_GetTagRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{field.Required(tagPath, "")},
 		},
@@ -1592,7 +1593,7 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 			name: "get: missing tag.atespace",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.GetTagRequest{Tag: &ateapipb.ObjectRef{Name: "nm"}}
-				return Validate_GetTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_GetTagRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{field.Required(tagPath.Child("atespace"), "")},
 		},
@@ -1600,7 +1601,7 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 			name: "get: invalid tag.name",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.GetTagRequest{Tag: &ateapipb.ObjectRef{Atespace: "as", Name: "NM"}}
-				return Validate_GetTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_GetTagRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{field.Invalid(tagPath.Child("name"), nil, "").WithOrigin("format=k8s-short-name")},
 		},
@@ -1608,14 +1609,14 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 			name: "delete: valid",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.DeleteTagRequest{Tag: validRef()}
-				return Validate_DeleteTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_DeleteTagRequest(ctx, op, nil, req, nil)
 			},
 		},
 		{
 			name: "delete: missing tag",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.DeleteTagRequest{}
-				return Validate_DeleteTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_DeleteTagRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{field.Required(tagPath, "")},
 		},
@@ -1623,7 +1624,7 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 			name: "delete: missing tag.atespace",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.DeleteTagRequest{Tag: &ateapipb.ObjectRef{Name: "nm"}}
-				return Validate_DeleteTagRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_DeleteTagRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{field.Required(tagPath.Child("atespace"), "")},
 		},
@@ -1633,14 +1634,14 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 			name: "list: empty request",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.ListTagsRequest{}
-				return Validate_ListTagsRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_ListTagsRequest(ctx, op, nil, req, nil)
 			},
 		},
 		{
 			name: "list: invalid atespace",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.ListTagsRequest{Atespace: "AS"}
-				return Validate_ListTagsRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_ListTagsRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{field.Invalid(field.NewPath("atespace"), nil, "").WithOrigin("format=k8s-short-name")},
 		},
@@ -1648,7 +1649,7 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 			name: "list: negative page_size",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.ListTagsRequest{PageSize: -1}
-				return Validate_ListTagsRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_ListTagsRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{field.Invalid(field.NewPath("page_size"), nil, "").WithOrigin("minimum")},
 		},
@@ -1656,7 +1657,7 @@ func TestValidateTagRequestPayloads(t *testing.T) {
 			name: "list: over-long page_token",
 			validate: func(ctx context.Context, op operation.Operation) field.ErrorList {
 				req := &ateapipb.ListTagsRequest{PageToken: strings.Repeat("t", 257)}
-				return Validate_ListTagsRequest(ctx, op, nil, req, nil)
+				return apivalidation.Validate_ListTagsRequest(ctx, op, nil, req, nil)
 			},
 			want: field.ErrorList{field.TooLong(field.NewPath("page_token"), nil, 256).WithOrigin("maxLength")},
 		},
@@ -1728,7 +1729,7 @@ func TestValidateGoldenSnapshotStatus(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Create}
-			assertValidateErr(t, Validate_GoldenSnapshotStatus(context.Background(), op, nil, tt.obj, nil), tt.want)
+			assertValidateErr(t, apivalidation.Validate_GoldenSnapshotStatus(context.Background(), op, nil, tt.obj, nil), tt.want)
 		})
 	}
 }
@@ -1780,7 +1781,7 @@ func TestValidateGoldenSnapshotStatusUpdate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			op := operation.Operation{Type: operation.Update}
-			assertValidateErr(t, Validate_GoldenSnapshotStatus(context.Background(), op, nil, tt.newObj, tt.oldObj), tt.want)
+			assertValidateErr(t, apivalidation.Validate_GoldenSnapshotStatus(context.Background(), op, nil, tt.newObj, tt.oldObj), tt.want)
 		})
 	}
 }

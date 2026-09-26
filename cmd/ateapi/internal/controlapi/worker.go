@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/agent-substrate/substrate/cmd/ateapi/internal/apivalidation"
 	"github.com/agent-substrate/substrate/cmd/ateapi/internal/defaults"
 	"github.com/agent-substrate/substrate/cmd/ateapi/internal/store"
 	"github.com/agent-substrate/substrate/pkg/proto/ateapipb"
@@ -27,7 +28,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"k8s.io/apimachinery/pkg/api/operation"
 	"k8s.io/apimachinery/pkg/api/validate"
-	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -63,7 +63,7 @@ func (s *RPCService) ListWorkerActorAssignments(ctx context.Context, req *ateapi
 
 func validateListWorkerActorAssignmentsRequest(ctx context.Context, req *ateapipb.ListWorkerActorAssignmentsRequest) field.ErrorList {
 	op := operation.Operation{Type: operation.Create}
-	return Validate_ListWorkerActorAssignmentsRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_ListWorkerActorAssignmentsRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) ListWorkers(ctx context.Context, req *ateapipb.ListWorkersRequest) (*ateapipb.ListWorkersResponse, error) {
@@ -88,7 +88,7 @@ func (s *ServiceImpl) ListWorkers(ctx context.Context, opts store.ListOptions) (
 func validateListWorkersRequest(ctx context.Context, req *ateapipb.ListWorkersRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_ListWorkersRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_ListWorkersRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) GetWorker(ctx context.Context, req *ateapipb.GetWorkerRequest) (*ateapipb.Worker, error) {
@@ -118,7 +118,7 @@ func (s *ServiceImpl) GetWorker(ctx context.Context, name string) (*ateapipb.Wor
 func validateGetWorkerRequest(ctx context.Context, req *ateapipb.GetWorkerRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_GetWorkerRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_GetWorkerRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) CreateWorker(ctx context.Context, req *ateapipb.CreateWorkerRequest) (*ateapipb.Worker, error) {
@@ -171,7 +171,7 @@ func (s *ServiceImpl) CreateWorker(ctx context.Context, inWorker *ateapipb.Worke
 func validateCreateWorkerRequest(ctx context.Context, req *ateapipb.CreateWorkerRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_CreateWorkerRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_CreateWorkerRequest(ctx, op, nil, req, nil)
 }
 
 // UpdateWorker replaces the stored Worker with the one the request carries.
@@ -242,7 +242,7 @@ func validateUpdateWorkerRequest(ctx context.Context, req *ateapipb.UpdateWorker
 	// validating the request itself. The result will be validated later, after
 	// we have a current value to compare against.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_UpdateWorkerRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_UpdateWorkerRequest(ctx, op, nil, req, nil)
 }
 
 // The assignment operations are pass-throughs: an assignment is its own record,
@@ -286,7 +286,7 @@ func validateDeleteWorkerRequest(ctx context.Context, req *ateapipb.DeleteWorker
 	// optional: a zero value waives that guard, so only non-zero values are
 	// checked for shape.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_DeleteWorkerRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_DeleteWorkerRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) DrainWorker(ctx context.Context, req *ateapipb.DrainWorkerRequest) (*ateapipb.Worker, error) {
@@ -322,7 +322,7 @@ func (s *RPCService) DrainWorker(ctx context.Context, req *ateapipb.DrainWorkerR
 func validateDrainWorkerRequest(ctx context.Context, req *ateapipb.DrainWorkerRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_DrainWorkerRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_DrainWorkerRequest(ctx, op, nil, req, nil)
 }
 
 // mutateWorker runs mutate against the named Worker and translates what comes
@@ -368,7 +368,7 @@ func (u *workerUnchanged) Error() string { return "worker is already in the requ
 func validateWorkerUpdate(ctx context.Context, fldPath *field.Path, newVal, oldVal *ateapipb.Worker, requireStatus bool) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Update}
-	errs := Validate_Worker(ctx, op, fldPath, newVal, oldVal)
+	errs := apivalidation.Validate_Worker(ctx, op, fldPath, newVal, oldVal)
 	if requireStatus {
 		// Status is optional in the schema, but is actually required to be set
 		// by the server.  If it was specified, it was already validated above,
@@ -380,26 +380,4 @@ func validateWorkerUpdate(ctx context.Context, fldPath *field.Path, newVal, oldV
 
 func (s *ServiceImpl) WatchWorkers(ctx context.Context) (*store.WorkerWatch, error) {
 	return s.store.WatchWorkers(ctx)
-}
-
-// This is needed because DV doesn't have a standard format for IP addresses yet.
-func ValidateCustom_Worker_Ip(_ context.Context, _ operation.Operation, fldPath *field.Path, value, _ *string) field.ErrorList {
-	return validation.IsValidIP(fldPath, *value)
-}
-
-// This exists only because nested subfield tags are not supported yet.
-func ValidateCustom_UpdateWorkerRequest_Worker(ctx context.Context, op operation.Operation, fldPath *field.Path, worker, _ *ateapipb.Worker) field.ErrorList {
-	if worker == nil || worker.Metadata == nil {
-		return nil // handled by DV
-	}
-
-	// Updates are validated in 2 steps: first the update request and then the
-	// resource itself. DV for the request doesn't descend into the resource
-	// metadata.  Once DV supports nested subfield tags, this can be changed to
-	// something like:
-	//   +k8s:subfield(metadata)=+k8s:subfield(atespace)=+k8s:forbidden
-	// Workers are global-scoped, so metadata.atespace must be empty.
-	errs := Validate_ResourceMetadata(ctx, op, fldPath.Child("metadata"), worker.Metadata, nil)
-	errs = append(errs, validate.ForbiddenValue(ctx, op, fldPath.Child("metadata", "atespace"), &worker.Metadata.Atespace, nil)...)
-	return errs
 }

@@ -17,6 +17,12 @@ We call this "declarative validation" or "DV" for short.  Almost all validation
 should be done with DV.  Any case which does not should be considered rare and
 exceptional.
 
+The generated validators and their custom Go checks live in
+`cmd/ateapi/internal/apivalidation`, shared by the Control and WorkerService
+servers. The package owns the validation-gen markers and protocol-aware equality
+helper; `hack/update/codegen.sh` regenerates its validators. Service-specific
+metadata scrubbing and gRPC error handling stay in the service packages.
+
 ## DV Tags
 
 All validation tags follow the same basic formats:

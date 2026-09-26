@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/agent-substrate/substrate/cmd/ateapi/internal/apivalidation"
 	"github.com/agent-substrate/substrate/cmd/ateapi/internal/defaults"
 	"github.com/agent-substrate/substrate/cmd/ateapi/internal/store"
 	"github.com/agent-substrate/substrate/pkg/proto/ateapipb"
@@ -65,7 +66,7 @@ func (s *ServiceImpl) CreateAtespace(ctx context.Context, inAtespace *ateapipb.A
 func validateCreateAtespaceRequest(ctx context.Context, req *ateapipb.CreateAtespaceRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_CreateAtespaceRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_CreateAtespaceRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) GetAtespace(ctx context.Context, req *ateapipb.GetAtespaceRequest) (*ateapipb.Atespace, error) {
@@ -90,7 +91,7 @@ func (s *ServiceImpl) GetAtespace(ctx context.Context, name string) (*ateapipb.A
 func validateGetAtespaceRequest(ctx context.Context, req *ateapipb.GetAtespaceRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_GetAtespaceRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_GetAtespaceRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) ListAtespaces(ctx context.Context, req *ateapipb.ListAtespacesRequest) (*ateapipb.ListAtespacesResponse, error) {
@@ -120,7 +121,7 @@ func (s *ServiceImpl) ListAtespaces(ctx context.Context, opts store.ListOptions)
 func validateListAtespacesRequest(ctx context.Context, req *ateapipb.ListAtespacesRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_ListAtespacesRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_ListAtespacesRequest(ctx, op, nil, req, nil)
 }
 
 func (s *RPCService) DeleteAtespace(ctx context.Context, req *ateapipb.DeleteAtespaceRequest) (*ateapipb.Atespace, error) {
@@ -155,5 +156,5 @@ func (s *ServiceImpl) DeleteAtespace(ctx context.Context, name string, precondit
 func validateDeleteAtespaceRequest(ctx context.Context, req *ateapipb.DeleteAtespaceRequest) field.ErrorList {
 	// Call the generated validation.
 	op := operation.Operation{Type: operation.Create}
-	return Validate_DeleteAtespaceRequest(ctx, op, nil, req, nil)
+	return apivalidation.Validate_DeleteAtespaceRequest(ctx, op, nil, req, nil)
 }

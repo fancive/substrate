@@ -36,13 +36,8 @@ func (s *Server) RequestActorSuspend(ctx context.Context, req *ateapipb.RequestA
 	if err != nil {
 		return nil, err
 	}
-	// TODO: replace the three checks below with the generated
-	// Validate_RequestActorSuspendRequest, which already enforces all of them
-	// from the tags on the message. It lives in controlapi today, because that
-	// package holds the only +k8s:validation-gen marker, and this package must
-	// not depend on the Control service. Once the marker moves to a neutral
-	// package both can import, call the generated validator here and drop
-	// validateActorRef with it.
+	// TODO: replace the three checks below with
+	// apivalidation.Validate_RequestActorSuspendRequest and remove validateActorRef.
 	//
 	// Workers are global-scoped, so the reference carries no atespace.
 	if errs := resources.ValidateGlobalObjectRef(req.GetWorker(), field.NewPath("worker")); len(errs) > 0 {

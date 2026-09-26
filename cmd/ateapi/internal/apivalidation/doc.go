@@ -15,9 +15,12 @@
 // Kubernetes codegen tools required this to be in doc.go, no other name will
 // work.
 
+// Package apivalidation validates the ate API resources and requests shared by
+// the Control and WorkerService servers.
+//
 // +k8s:validation-gen=TypesWithSuffix=Request
 // +k8s:validation-gen-input=github.com/agent-substrate/substrate/pkg/proto/ateapipb
 // +k8s:validation-gen-scheme-registry=nil
 // +k8s:validation-gen-deep-equal-func=ateDeepEqual
 
-package controlapi
+package apivalidation
